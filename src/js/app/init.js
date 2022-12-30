@@ -5,7 +5,7 @@
 const $ = require('jquery');
 let otrQueryParams = {};
 
-import { watchFormatting, watchWordCount, initAutoscroll } from './texteditor';
+import { watchFormatting, watchWordCount, initAutoscroll, setEditorContents } from './texteditor';
 import { inputSetup, getQueryParams, hide as inputHide, localStorage } from './input';
 import oldBrowserCheck from './old-browsers';
 import languageSetup from './languages';
@@ -17,8 +17,11 @@ import { exportSetup } from './export';
 import importSetup from './import';
 import viewController from './view-controller';
 import { createSilentAudio } from './silent-audio';
+import { getTranscriptionFile, getTranscriptionText } from './softcatala'
+import { closeTips } from './utils';
+import { readFromFile, readFromMicro } from './vosk-controller';
 
-export default function init(){
+export default async function init(){
     initBackup();
     watchFormatting();
     languageSetup();
@@ -36,6 +39,9 @@ export default function init(){
     window.activateTimestamps = activateTimestamps;
     window.createSilentAudio = createSilentAudio;
     window.localStorageManager = localStorage;
+    window.closeTips = closeTips;
+    window.readFromFile = readFromFile;
+    window.readFromMicro = readFromMicro;
     
     keyboardShortcutSetup();
 
@@ -64,6 +70,30 @@ export default function init(){
             }
         });
 
+    } else if (otrQueryParams['uuid']) {
+        const uuid = otrQueryParams['uuid'];
+        $('.start').removeClass('ready');
+
+        const text = await getTranscriptionText(uuid);
+        const loadedFile = await getTranscriptionFile(uuid);
+        viewController.set('editor');
+        document.getElementById('vosk-controls').style.display = "none";
+        inputHide();
+        closeTips();
+        document.getElementById('textbox').replaceChildren(text);
+        activateTimestamps();
+
+        try {
+            await createPlayer({
+                driver: isVideoFormat(loadedFile) ? playerDrivers.HTML5_VIDEO : playerDrivers.HTML5_AUDIO,
+                source: window.URL.createObjectURL(loadedFile),
+                name: loadedFile.name
+            });
+            bindPlayerToUI(loadedFile.name);
+        } catch (error) {
+            console.error(error);
+        }
+
     } else {
 
         if ( localStorageManager.getItem("oT-lastfile") ) {
@@ -87,6 +117,9 @@ export default function init(){
         }
     });
 
+    let isVisible = localStorage.getItem('oTranscribe-visible-tips');
+    isVisible = (isVisible === null) ? true : false; // it's an string
+    if (!isVisible) closeTips();
 }
 
 // note: this function may run multiple times

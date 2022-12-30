@@ -11,19 +11,6 @@
         </div>
     </div>
 
-    <script>
-        function closeTips () {
-            document.getElementById("tips").style.display = "none";
-            localStorage.setItem('oTranscribe-visible-tips', 1);
-        }
-
-        (function () {
-            let isVisible = localStorage.getItem('oTranscribe-visible-tips');
-            isVisible = (isVisible === null) ? true : false; // it's an string
-            if (!isVisible) closeTips();
-        })();
-    </script>
-
     <div class="input active">
         <div class="file-input-outer"></div>    
         <div id="lastfile"></div>
@@ -35,240 +22,50 @@
             <div class="message-content"></div>
     </div>
     
+    <div id="vosk-controls">    
+        <div style="display: flex; justify-content:center; margin:auto; margin-bottom: 20px; width: 20%;">
+            <div style="display: inline;">
+            <select name="model" id="model" style="width: 100%;">
+                <option value="vosk-model-small-fa-0.4.tar.gz">Farsi</option>
+                <option value="vosk-model-small-es-0.3.tar.gz">Español</option>
+                <option value="vosk-model-small-fr-pguyot-0.3.tar.gz">French</option>
+                <option value="vosk-model-small-vn-0.3.tar.gz">Vietnamese</option>
+                <option value="vosk-model-small-pt-0.3.tar.gz">Portuguese</option>
+                <option value="vosk-model-small-en-us-0.15.tar.gz">English</option>
+                <option value="vosk-model-small-de-0.15.tar.gz">Deutsch</option>
+                <option value="vosk-model-small-it-0.4.tar.gz">Italiano</option>
+                <option value="vosk-model-small-cn-0.3.tar.gz">Chinese</option>
+                <option value="vosk-model-small-tr-0.3.tar.gz">Turkish</option>
+                <option value="vosk-model-small-ru-0.4.tar.gz">Russian</option>
+                <option value="vosk-model-small-ca-0.4.tar.gz" selected="true">Catalan</option>
+                <option value="vosk-model-small-en-in-0.4.tar.gz">Indian English</option>
+            </select>
+            </div>
+        </div>
 
-    <script>
-        let model = null;
-        let recognizer = null;
-        let source = null;
-        var currentFile = null;
-        let lastTimestampedMin = 0;
-        var audioContext = null;
+        <div style="display: block;margin: auto;width: 30%;">
+            <div style="display: flex;flex-direction: row;justify-content: space-around;">
+                <p style="text-align: center; margin: 0 2rem;">
+                    <button id="buttonReadFromMicro" class="alt-input-button" onclick="readFromMicro()">Write from micro</button>
+                </p>
+                <p style="text-align: center; margin: 0 2rem;">
+                    <audio id="audio-ref" autoplay></audio>
+                    <button id="buttonReadFromFile" class="alt-input-button" onclick="readFromFile()">Write from micro</button>
+                </p>
+                <script>
+                    window.addEventListener('localized', function(event) {
+                        document.getElementById("buttonReadFromFile").innerText = document.webL10n.get('readFromFile');
+                        document.getElementById("buttonReadFromMicro").innerText = document.webL10n.get('readFromMicro');
+                    }); 
+                    
+                </script>
+            </div>  
+        </div>
 
-        async function stop() {
-            console.log("stopping");
-            lastTimestampedMin = 0;
-            if (model !== null) {
-                model.terminate();
-                model = null;
-            }
-            if (recognizer !== null) {
-                recognizer.remove();
-                recognizer = null;
-            }
-            /*
-            if (source !== null) {
-                source.disconnect();
-                source = null;
-            }
-            if (audioContext !== null) {
-                await audioContext.close();
-                audioContext = null;
-            }
-            */
-        }
-
-        function autoTimestamp(second) {
-            let currentMinute = Math.floor(second / 60);
-            if ((currentMinute === 0) || (currentMinute === lastTimestampedMin)) {
-                return null;
-            }
-            lastTimestampedMin = currentMinute;
-            let time = {
-                formatted: window.formatMilliseconds(second),
-                raw: second
-            };
-            return window.createTimestampEl(time);
-        }
-
-        function onPartialResult(message) {
-            const partialContainer = document.getElementById('partial');
-            const partial = message.result.partial;
-            partialContainer.textContent = partial;
-            // console.log("Partial result:", partial);
-        }
-
-        function onResult(message) {
-            const partialContainer = document.getElementById('partial');
-            const resultsContainer = document.getElementById('textbox');
-            const grayValues = "0123456789ABCDEF";
-            const space = document.createTextNode("\u00A0");
-            let timestamp = null;
-            
-            const result = message.result;
-            if (result.text === "") {
-                return;
-            }
-            // console.log("Result:", message.result);
-            result.result.forEach( (e) => {
-                var idx = (14 - Math.round(e.conf * 14)) + 2;
-                var chr = grayValues[idx];
-                const newSpan = document.createElement('span');
-                newSpan.textContent = e.word + " ";
-                newSpan.title = e.conf;
-                newSpan.style.cssText = `color: #${chr}${chr}${chr};`
-                newSpan.dataset.meta = JSON.stringify(e);
-
-                timestamp = autoTimestamp(e["start"]);
-                if (timestamp !== null) {
-                    const newParagraph = document.createElement('p');
-                    newParagraph.append(document.createElement('br'));
-                    newParagraph.append(timestamp);
-                    resultsContainer.insertAdjacentElement("beforeend", newParagraph);
-                    activateTimestamps();
-                }
-
-                resultsContainer.insertAdjacentElement("beforeend", newSpan);
-            });
-            partialContainer.textContent = "";
-        }
-
-        async function readFromMicro() {  
-            await stop();
-
-            const partialContainer = document.getElementById('partial');         
-            const modelName = document.getElementById("model").value;
-            console.log("Loading model: ", modelName);
-
-            partialContainer.textContent = document.webL10n.get('loadingModel');
-            
-            const channel = new MessageChannel();
-            let modelUrl = new URL("/models/" + modelName, modelsPrefix || window.location);
-            model = await Vosk.createModel(modelUrl.href);
-            model.registerPort(channel.port1);
-
-            const sampleRate = 48000;
-            
-            recognizer = new model.KaldiRecognizer(sampleRate);
-            recognizer.setWords(true);
-            recognizer.on("result", onResult);
-            recognizer.on("partialresult", onPartialResult);
-
-            partialContainer.textContent = "Ready";
-            
-            const mediaStream = await navigator.mediaDevices.getUserMedia({
-                video: false,
-                audio: {
-                    echoCancellation: true,
-                    noiseSuppression: true,
-                    channelCount: 1,
-                    sampleRate
-                },
-            });
-            
-            audioContext = (audioContext === null) ? new AudioContext() : audioContext;
-            await audioContext.audioWorklet.addModule('recognizer-processor.js')
-            const recognizerProcessor = new AudioWorkletNode(audioContext, 'recognizer-processor', { channelCount: 1, numberOfInputs: 1, numberOfOutputs: 1 });
-            recognizerProcessor.port.postMessage({action: 'init', recognizerId: recognizer.id}, [ channel.port2 ])
-            recognizerProcessor.connect(audioContext.destination);
-            
-            if (source !== null) source.disconnect();
-
-            source = audioContext.createMediaStreamSource(mediaStream);
-            source.connect(recognizerProcessor);
-        }
-
-        async function readFromFile(e) {
-            if (currentFile === null) {
-                const fileNotFoundText = document.webL10n.get('fileNotFound');
-                alert(fileNotFoundText);
-                return;
-            }
-
-            stop();
-
-            const file = currentFile; // e.target.files[0];
-            const partialContainer = document.getElementById('partial');
-            const audioRef = document.getElementById('audio-ref')
-            const modelName = document.getElementById("model").value;
-            console.log("Loading ", modelName);
-
-            partialContainer.textContent = document.webL10n.get('loadingModel');
-            
-            const channel = new MessageChannel();
-            let modelUrl = new URL("/models/" + modelName, modelsPrefix || window.location);
-            model = await Vosk.createModel(modelUrl.href);
-            model.registerPort(channel.port1);
-
-            const sampleRate = 48000;
-            recognizer = new model.KaldiRecognizer(sampleRate);
-            recognizer.setWords(true);
-            recognizer.on("result", onResult);
-            recognizer.on("partialresult", onPartialResult);
-
-            // const [audioSource, setAudioSource] = useState<MediaElementAudioSourceNode>();
-            const fileUrl = URL.createObjectURL(file);
-            const audioPlayer = audioRef; //.current;
-            audioPlayer.src = fileUrl;
-
-            audioContext = (audioContext === null) ? new AudioContext() : audioContext;
-            const stream_dest = audioContext.createMediaStreamDestination();
-            if (source !== null) source.disconnect();
-            source = (source === null) ? audioContext.createMediaElementSource(audioPlayer) : source;
-            
-            await audioContext.audioWorklet.addModule('recognizer-processor.js')
-            const recognizerProcessor = new AudioWorkletNode(audioContext, 'recognizer-processor', { channelCount: 1, numberOfInputs: 1, numberOfOutputs: 1 });
-            recognizerProcessor.port.postMessage({action: 'init', recognizerId: recognizer.id}, [ channel.port2 ])
-            recognizerProcessor.connect(audioContext.destination);
-
-            source.connect(recognizerProcessor);
-
-            audioRef.addEventListener("ended", function() 
-            {
-                // This dynamically generates a silent sound and appends it at the end of the playing. With this we avoid
-                // to abruptly stop the recognition, which was a bug on firefox. When it finishes we stop the recognition
-                // process, which keeping it alive was a bug on Chrome.
-                audioPlayer.src = createSilentAudio(1, 44100);
-                audioPlayer.play();
-                audioPlayer.addEventListener("ended", function() {
-                    recognizer.retrieveFinalResult();
-                    model.terminate();
-                }, {once: true});
-            }, { once: true });
-        }
-    </script>
-    <div style="display: flex; justify-content:center; margin:auto; margin-bottom: 20px; width: 20%;">
-        <div style="display: inline;">
-        <select name="model" id="model" style="width: 100%;">
-            <option value="vosk-model-small-fa-0.4.tar.gz">Farsi</option>
-            <option value="vosk-model-small-es-0.3.tar.gz">Español</option>
-            <option value="vosk-model-small-fr-pguyot-0.3.tar.gz">French</option>
-            <option value="vosk-model-small-vn-0.3.tar.gz">Vietnamese</option>
-            <option value="vosk-model-small-pt-0.3.tar.gz">Portuguese</option>
-            <option value="vosk-model-small-en-us-0.15.tar.gz">English</option>
-            <option value="vosk-model-small-de-0.15.tar.gz">Deutsch</option>
-            <option value="vosk-model-small-it-0.4.tar.gz">Italiano</option>
-            <option value="vosk-model-small-cn-0.3.tar.gz">Chinese</option>
-            <option value="vosk-model-small-tr-0.3.tar.gz">Turkish</option>
-            <option value="vosk-model-small-ru-0.4.tar.gz">Russian</option>
-            <option value="vosk-model-small-ca-0.4.tar.gz" selected="true">Catalan</option>
-            <option value="vosk-model-small-en-in-0.4.tar.gz">Indian English</option>
-          </select>
+        <div id="partial-container">
+            <p id="partial"></p>
         </div>
     </div>
-
-    <div style="display: block;margin: auto;width: 30%;">
-        <div style="display: flex;flex-direction: row;justify-content: space-around;">
-            <p style="text-align: center; margin: 0 2rem;">
-                <button id="buttonReadFromMicro" class="alt-input-button" onclick="readFromMicro()">Write from micro</button>
-            </p>
-            <p style="text-align: center; margin: 0 2rem;">
-                <audio id="audio-ref" autoplay></audio>
-                <button id="buttonReadFromFile" class="alt-input-button" onclick="readFromFile()">Write from micro</button>
-            </p>
-            <script>
-                window.addEventListener('localized', function(event) {
-                    document.getElementById("buttonReadFromFile").innerText = document.webL10n.get('readFromFile');
-                    document.getElementById("buttonReadFromMicro").innerText = document.webL10n.get('readFromMicro');
-                }); 
-                
-            </script>
-        </div>  
-    </div>
-
-    <div id="partial-container">
-        <p id="partial"></p>
-    </div>
-    
     <div id="textbox"  class="mousetrap" contenteditable="true">
         
     </div>
