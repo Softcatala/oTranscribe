@@ -19,7 +19,7 @@ import viewController from './view-controller';
 import { createSilentAudio } from './silent-audio';
 import { getTranscriptionFile, getTranscriptionText } from './softcatala'
 import { closeTips } from './utils';
-import { readFromFile, readFromMicro } from './vosk-controller';
+import { VoskController } from './vosk-controller';
 
 export default async function init(){
     initBackup();
@@ -40,8 +40,7 @@ export default async function init(){
     window.createSilentAudio = createSilentAudio;
     window.localStorageManager = localStorage;
     window.closeTips = closeTips;
-    window.readFromFile = readFromFile;
-    window.readFromMicro = readFromMicro;
+    window.voskController = new VoskController();
     
     keyboardShortcutSetup();
 
