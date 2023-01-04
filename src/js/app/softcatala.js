@@ -19,9 +19,8 @@ function parseSubtitleFormat(rawSrt) {
             raw: startTimeSeconds
         });
         parsedSrt.appendChild(timestampEl);
-        const textEl = document.createElement('span');
-        textEl.innerText = data[2];
-        parsedSrt.appendChild(textEl);
+        parsedSrt.insertAdjacentText('beforeend', ' ')
+        parsedSrt.insertAdjacentText('beforeend', data[2])
         parsedSrt.appendChild(document.createElement('br'));
     }
     return parsedSrt;

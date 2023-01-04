@@ -25,7 +25,10 @@ exportFormats.download.push({
     extension: 'md',
     fn: (txt) => {
         const fullyClean = sanitizeHtml(txt, {
-            allowedTags: [ 'p', 'em', 'strong', 'i', 'b', 'br' ]
+            allowedTags: [ 'p', 'em', 'strong', 'i', 'b', 'br', 'span' ],
+            exclusiveFilter: function(frame) {
+                return frame.tag === 'span' && frame.attribs.class === "timestamp";
+            }
         });
         const md = toMarkdown( fullyClean );
         return md.replace(/\t/gm,"");           
@@ -37,7 +40,10 @@ exportFormats.download.push({
     extension: 'txt',
     fn: (txt) => {
         const fullyClean = sanitizeHtml(txt, {
-            allowedTags: [ 'p' ]
+            allowedTags: [ 'p', 'br', 'span' ],
+            exclusiveFilter: function(frame) {
+                return frame.tag === 'span' && frame.attribs.class === "timestamp";
+            }
         });
         const md = toMarkdown( fullyClean );
         return md.replace(/\t/gm,"");           
