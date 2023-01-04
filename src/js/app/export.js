@@ -74,15 +74,15 @@ exportFormats.download.push({
     }
 });
 
-exportFormats.send.push({
-    name: 'Google Drive',
-    setup: function(cb) {
-        this.checkGoogleAuth = googleDriveSetup(cb);
-    },
-    fn: function(opts) {
-        this.checkGoogleAuth(opts);
-    }
-})
+// exportFormats.send.push({
+//     name: 'Google Drive',
+//     setup: function(cb) {
+//         this.checkGoogleAuth = googleDriveSetup(cb);
+//     },
+//     fn: function(opts) {
+//         this.checkGoogleAuth(opts);
+//     }
+// })
 
 function generateButtons(filename) {
     
