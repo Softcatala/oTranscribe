@@ -26,7 +26,7 @@ export default class HTML5_AUDIO {
         return this.element.duration;
     }
     isReady() {
-        return (!this.destroyed && (!isNaN(this.element.duration)) && (this.element.readyState === 4));
+        return (!this.destroyed && (!isNaN(this.element.duration)) && (this.element.readyState >= 3));
     }
     getSpeed() {
         return this.element.playbackRate;

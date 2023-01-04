@@ -1,5 +1,7 @@
 import { convertTimestampToSeconds, createTimestampEl } from "./timestamps";
 
+const $ = require('jquery');
+
 const SC_BASE_URL = "https://api.softcatala.org/transcribe-service/v1/get_file/"
 
 function parseSubtitleFormat(rawSrt) {
@@ -25,7 +27,7 @@ function parseSubtitleFormat(rawSrt) {
     return parsedSrt;
 }
 
-async function getTranscriptionText(uuid) {
+export async function getTranscriptionText(uuid) {
     const response = await fetch( `${SC_BASE_URL}?uuid=${uuid}&ext=srt` , {
         method: 'GET'
     });
@@ -33,13 +35,11 @@ async function getTranscriptionText(uuid) {
     return parseSubtitleFormat(text);
 }
 
-async function getTranscriptionFile(uuid) {
-    const response = await fetch( `${SC_BASE_URL}?uuid=${uuid}&ext=bin` , {
-        method: 'GET'
-    });
-    const fileBlob = await response.arrayBuffer();
+export function getTranscriptionFileURL(uuid) {
+    return `${SC_BASE_URL}?uuid=${uuid}&ext=bin`;
+}
 
-    const contentDisposition = response.headers['content-disposition'];
+function getFileType(contentDisposition) {
     const fileExtensionRegexResult = /file\.(\w{3})/.exec(contentDisposition);
     let fileExtension = undefined;
     let fileType = "audio/mp3";
@@ -56,8 +56,35 @@ async function getTranscriptionFile(uuid) {
         fileType = "unknown";
     }
 
-    const loadedFile = new File([fileBlob], `${uuid}.${fileExtension}`, { type: fileType});
+    return fileType;
+}
+
+export async function getTranscriptionFileType(uuid) {
+    const response = await fetch( getTranscriptionFileURL(uuid) , {
+        method: 'HEAD'
+    });
+
+    const contentDisposition = response.headers['content-disposition'];
+    
+    return getFileType(contentDisposition);
+}
+
+export async function getTranscriptionFile(uuid) {
+    const response = await fetch( getTranscriptionFileURL(uuid) , {
+        method: 'GET'
+    });
+    const fileBlob = await response.arrayBuffer();
+
+    const contentDisposition = response.headers['content-disposition'];
+    
+    const fileType = getFileType(contentDisposition);
+
+    const loadedFile = new File([fileBlob], `${uuid}`, { type: fileType});
     return loadedFile;
 }
 
-export { getTranscriptionFile, getTranscriptionText };
+export function patchUI() {
+    $('.help-title').hide();
+    $('.language-title').hide();
+    document.getElementsByClassName('title')[0].outerHTML = document.getElementsByClassName('title')[0].outerHTML;
+}

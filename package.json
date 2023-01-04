@@ -45,6 +45,7 @@
     "local-storage-manager": "git+https://github.com/ejb/localStorageManager.git",
     "mousetrap": "^1.6.5",
     "mustache": "^4.2.0",
+    "otinput": "github:oTranscribe/oTinput",
     "preact": "^10.10.0",
     "progressor": "^0.0.1",
     "progressor.js": "git+https://github.com/ejb/progressor.js.git",

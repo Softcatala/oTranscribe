@@ -5,8 +5,10 @@
 const $ = require('jquery');
 let otrQueryParams = {};
 
-import { watchFormatting, watchWordCount, initAutoscroll, setEditorContents } from './texteditor';
-import { inputSetup, getQueryParams, hide as inputHide, localStorage } from './input';
+import localStorageManager from 'local-storage-manager';
+
+import { watchFormatting, watchWordCount, initAutoscroll } from './texteditor';
+import { inputSetup, getQueryParams, hide as inputHide } from './input';
 import oldBrowserCheck from './old-browsers';
 import languageSetup from './languages';
 import { createPlayer, playerDrivers, getPlayer, isVideoFormat } from './player/player';
@@ -17,7 +19,7 @@ import { exportSetup } from './export';
 import importSetup from './import';
 import viewController from './view-controller';
 import { createSilentAudio } from './silent-audio';
-import { getTranscriptionFile, getTranscriptionText } from './softcatala'
+import { getTranscriptionFileType, getTranscriptionFileURL, getTranscriptionText, patchUI } from './softcatala'
 import { closeTips } from './utils';
 import { VoskController } from './vosk-controller';
 
@@ -38,13 +40,27 @@ export default async function init(){
     window.createTimestampEl = createTimestampEl;
     window.activateTimestamps = activateTimestamps;
     window.createSilentAudio = createSilentAudio;
-    window.localStorageManager = localStorage;
     window.closeTips = closeTips;
     window.voskController = new VoskController();
     
     keyboardShortcutSetup();
 
     viewController.set('about');
+
+    $('.title').mousedown(() => {
+        if (viewController.is('about')) {
+            viewController.set('editor');
+        } else {
+            viewController.set('about');
+        }
+    });
+    $('.settings-button').mousedown(() => {
+        if (viewController.is('settings')) {
+            viewController.set('editor');
+        } else {
+            viewController.set('settings');
+        }
+    });
 
     // Gather query parameters into an object
     otrQueryParams = getQueryParams();
@@ -71,27 +87,32 @@ export default async function init(){
 
     } else if (otrQueryParams['uuid']) {
         const uuid = otrQueryParams['uuid'];
-        $('.start').removeClass('ready');
+        localStorageManager.removeItem("oT-lastfile");
+        localStorageManager.removeItem("autosave"); 
 
-        const text = await getTranscriptionText(uuid);
-        const loadedFile = await getTranscriptionFile(uuid);
+        patchUI();
         viewController.set('editor');
         document.getElementById('vosk-controls').style.display = "none";
         inputHide();
         closeTips();
+
+        const text = await getTranscriptionText(uuid);
         document.getElementById('textbox').replaceChildren(text);
-        activateTimestamps();
 
         try {
+            const fileType = await getTranscriptionFileType(uuid);
+
             await createPlayer({
-                driver: isVideoFormat(loadedFile) ? playerDrivers.HTML5_VIDEO : playerDrivers.HTML5_AUDIO,
-                source: window.URL.createObjectURL(loadedFile),
-                name: loadedFile.name
+                driver: fileType.indexOf('video') > -1 ? playerDrivers.HTML5_VIDEO : playerDrivers.HTML5_AUDIO,
+                source: getTranscriptionFileURL(uuid),
+                name: uuid
             });
-            bindPlayerToUI(loadedFile.name);
+            bindPlayerToUI(uuid);
+            activateTimestamps();
         } catch (error) {
             console.error(error);
         }
+        inputHide();
 
     } else {
 
@@ -101,22 +122,7 @@ export default async function init(){
         
     }
 
-    $('.title').mousedown(() => {
-        if (viewController.is('about')) {
-            viewController.set('editor');
-        } else {
-            viewController.set('about');
-        }
-    });
-    $('.settings-button').mousedown(() => {
-        if (viewController.is('settings')) {
-            viewController.set('editor');
-        } else {
-            viewController.set('settings');
-        }
-    });
-
-    let isVisible = localStorage.getItem('oTranscribe-visible-tips');
+    let isVisible = localStorageManager.getItem('oTranscribe-visible-tips');
     isVisible = (isVisible === null) ? true : false; // it's an string
     if (!isVisible) closeTips();
 }

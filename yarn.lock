@@ -4818,6 +4818,10 @@
     "type-check" "^0.4.0"
     "word-wrap" "^1.2.3"
 
+"otinput@github:oTranscribe/oTinput":
+  "resolved" "git+ssh://git@github.com/oTranscribe/oTinput.git#d391de6aac1ce08a4245b4a431e58e51e24d48e6"
+  "version" "1.0.0"
+
 "p-limit@^2.2.0":
   "integrity" "sha512-//88mFWSJx8lxCzwdAABTJL2MyWB12+eIY7MDL2SqLmAkeKU9qxRvWuSyTjm3FUmpBEMuFfckAIqEaVGUDxb6w=="
   "resolved" "https://registry.npmjs.org/p-limit/-/p-limit-2.3.0.tgz"

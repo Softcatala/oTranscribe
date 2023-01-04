@@ -26,7 +26,7 @@ export default class HTML5_VIDEO {
         return this.element.duration;
     }
     isReady() {
-        return (!this.destroyed && (!isNaN(this.element.duration)) && (this.element.readyState === 4));
+        return (!this.destroyed && (!isNaN(this.element.duration)) && (this.element.readyState >= 4));
     }
     getSpeed() {
         return this.element.playbackRate;

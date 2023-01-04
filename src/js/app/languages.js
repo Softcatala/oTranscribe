@@ -1,3 +1,5 @@
+import localStorageManager from 'local-storage-manager';
+
 const $ = require('jquery');
 
 var languages = {
@@ -38,7 +40,7 @@ function applyLang(callback){
     if(lang) {
         document.webL10n.setLanguage(lang);
     } else {
-        document.webL10n.setLanguage('en');
+        document.webL10n.setLanguage('ca');
     }
 }
 
