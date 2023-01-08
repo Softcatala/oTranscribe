@@ -44,7 +44,7 @@ class Settings extends Component {
         }
         return (
             <div>
-                <h2 class="panel-title">Settings</h2>
+                <h2 class="panel-title">{document.webL10n.get("settings")}</h2>
                 <KeyboardShortcuts
                     settings={this.state.keyboardShortcuts}
                     reset={reset.bind(this, 'keyboardShortcuts')}

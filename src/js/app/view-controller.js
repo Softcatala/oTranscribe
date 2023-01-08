@@ -4,12 +4,8 @@ const $ = (sel) => document.querySelector(sel);
 let currentView = 'about';
 
 const views = {
-    about: () => {
-        $('.title').classList.add('active');
-        $('.about').classList.add('active');
-    },
     editor: () => {
-        $('.textbox-container').style.display = 'block';
+        $('.textbox-container').style.display = 'flex';
     },
     settings: () => {
         $('.settings-button').classList.add('active');
@@ -21,7 +17,6 @@ const views = {
 
 const hideAllViews = () => {
     $('.title').classList.remove('active');
-    $('.about').classList.remove('active');
     $('.settings-button').classList.remove('active');
     $('.settings-panel').classList.remove('active');
     $('.textbox-container').style.display = 'none';

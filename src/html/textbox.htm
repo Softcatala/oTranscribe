@@ -1,71 +1,9 @@
 <div class="textbox-container">
-    <div id="tips">
-        <div class="content">
-        <div class="close-message-panel"><span onclick="closeTips();"><i class="fa fa-times"></i></span></div>
-        <div class="text">
-        <p data-l10n-id="d-txt1">Enter your transcript here...</p>
-        <p data-l10n-id="d-txt2">Protips:</p>
-        <p data-l10n-id="d-txt3">- <em>Ctrl+I</em> adds <em>italic</em> formatting and <b>Ctrl+B</b> adds <b>bold</b> formatting.</p>
-        <p data-l10n-id="d-txt4">- Press ESC to play/pause, and Ctrl+J to insert the current timestamp.<p>
-        </div>
-        </div>
-    </div>
-
-    <div class="input active">
-        <div class="file-input-outer"></div>    
-        <div id="lastfile"></div>
-        <div id="formats"></div>
-    </div>
-    
     <div class="message-panel hidden">
             <div class="close-message-panel"><i class="fa fa-times"></i></div>
             <div class="message-content"></div>
     </div>
-    
-    <div id="vosk-controls">    
-        <div style="display: flex; justify-content:center; margin:auto; margin-bottom: 20px; width: 20%;">
-            <div style="display: inline;">
-            <select name="model" id="model" style="width: 100%;">
-                <option value="vosk-model-small-fa-0.4.tar.gz">Farsi</option>
-                <option value="vosk-model-small-es-0.3.tar.gz">Español</option>
-                <option value="vosk-model-small-fr-pguyot-0.3.tar.gz">French</option>
-                <option value="vosk-model-small-vn-0.3.tar.gz">Vietnamese</option>
-                <option value="vosk-model-small-pt-0.3.tar.gz">Portuguese</option>
-                <option value="vosk-model-small-en-us-0.15.tar.gz">English</option>
-                <option value="vosk-model-small-de-0.15.tar.gz">Deutsch</option>
-                <option value="vosk-model-small-it-0.4.tar.gz">Italiano</option>
-                <option value="vosk-model-small-cn-0.3.tar.gz">Chinese</option>
-                <option value="vosk-model-small-tr-0.3.tar.gz">Turkish</option>
-                <option value="vosk-model-small-ru-0.4.tar.gz">Russian</option>
-                <option value="vosk-model-small-ca-0.4.tar.gz" selected="true">Catalan</option>
-                <option value="vosk-model-small-en-in-0.4.tar.gz">Indian English</option>
-            </select>
-            </div>
-        </div>
-
-        <div style="display: block;margin: auto;width: 30%;">
-            <div style="display: flex;flex-direction: row;justify-content: space-around;">
-                <p style="text-align: center; margin: 0 2rem;">
-                    <button id="buttonReadFromMicro" class="alt-input-button" onclick="readFromMicro()">Write from micro</button>
-                </p>
-                <p style="text-align: center; margin: 0 2rem;">
-                    <audio id="audio-ref" autoplay></audio>
-                    <button id="buttonReadFromFile" class="alt-input-button" onclick="readFromFile()">Write from micro</button>
-                </p>
-                <script>
-                    window.addEventListener('localized', function(event) {
-                        document.getElementById("buttonReadFromFile").innerText = document.webL10n.get('readFromFile');
-                        document.getElementById("buttonReadFromMicro").innerText = document.webL10n.get('readFromMicro');
-                    }); 
-                    
-                </script>
-            </div>  
-        </div>
-
-        <div id="partial-container">
-            <p id="partial"></p>
-        </div>
-    </div>
+ 
     <div id="textbox"  class="mousetrap" contenteditable="true">
         
     </div>
@@ -86,12 +24,6 @@
         <button class="sbutton backup">
             <i class="fa fa-history"></i><span class="label" data-l10n-id="history-button">history</span>
         </button>
-        <div class="import-file-wrapper">
-            <button class="sbutton import">
-                <i class="fa fa-sign-in" id="icon-imp"></i><span class="label" data-l10n-id="import-button">Import</span>
-            </button>
-            <input id="local-file-import" type="file" name="file" accept=".otr"  />
-        </div>
         <button class="sbutton export">
             <i class="fa fa-share-square-o" id="icon-exp"></i><span class="label" data-l10n-id="export">Export</span>
             
@@ -103,12 +35,6 @@
         <div class="export-title" data-l10n-id="export-download">Download transcript as...</div>
         <a class="export-block-md" id="x-md" target="_blank"  data-l10n-id="export-markdown">Markdown (.md)</a>
         <a class="export-block-txt" id="x-txt" target="_blank" data-l10n-id="export-text">Plain text (.txt)</a>
-        <a class="export-block-txt" id="x-otr" target="_blank" data-l10n-id="export-otr">oTranscribe format (.otr)</a>
-        <div class="export-title" data-l10n-id="export-send">Send transcript to...</div>
-        <a class="export-block-gd unauth" id="x-gd" target="_blank" href="javascript:void(0);">
-            Google Drive
-            <div class="sign-in" data-l10n-id="sign-in" id="x-gd-sign">Sign in</div>
-        </a>
     </div>
     
     <div class="backup-panel">

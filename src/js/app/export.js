@@ -36,7 +36,7 @@ exportFormats.download.push({
 });
 
 exportFormats.download.push({
-    name: 'Plain text',
+    name: 'Text pla',
     extension: 'txt',
     fn: (txt) => {
         const fullyClean = sanitizeHtml(txt, {
@@ -49,40 +49,6 @@ exportFormats.download.push({
         return md.replace(/\t/gm,"");           
     }
 });
-
-exportFormats.download.push({
-    name: 'oTranscribe format',
-    extension: 'otr',
-    fn: (txt) => {
-        let result = {};
-        result.text = txt.replace('\n','');
-        const player = getPlayer();
-        if (player){
-            result.media = player.getName();
-            result['media-time'] = player.getTime();
-            // if (oT.media.ytEl) {
-            //     result['media-source'] = oT.media._ytEl.getVideoUrl();
-            // } else {
-            //     result['media-source'] = '';
-            // }
-        } else {
-            result.media = '';
-            result['media-source'] = '';
-            result['media-time'] = '';
-        }
-        return JSON.stringify(result);
-    }
-});
-
-// exportFormats.send.push({
-//     name: 'Google Drive',
-//     setup: function(cb) {
-//         this.checkGoogleAuth = googleDriveSetup(cb);
-//     },
-//     fn: function(opts) {
-//         this.checkGoogleAuth(opts);
-//     }
-// })
 
 function generateButtons(filename) {
     
@@ -133,7 +99,7 @@ export function exportSetup(){
         // document.querySelector('.container').innerHTML = downloadButtons;
         var origin = $('#icon-exp').offset();
         var right = parseInt( $('body').width() - origin.left + 25 );
-        var top = parseInt( origin.top ) - 50;
+        var top = parseInt( origin.top );
         
         const filename = getFilename();
         const data = {
@@ -159,7 +125,6 @@ export function exportSetup(){
         });
 
         $('.export-panel')
-            .css({'right': right,'top': top})
             .addClass('active'); 
         
     });

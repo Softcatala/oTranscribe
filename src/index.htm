@@ -12,28 +12,17 @@
 </head>
 
 <body>
-    <script type="application/javascript" src="vosk.js"></script>
-    <script type="text/javascript" src="l10n.js"></script>
+    <div id="otranscribe-panel">
+        <script type="text/javascript" src="l10n.js"></script>
 
-    <% if (!APPLICATION) { %>
-    <script src="./jakecache.js" type="text/javascript" charset="utf-8"></script>
-    <% } %>
-    <script>
-        var modelsPrefix = "<%= MODELSPREFIX %>";
-    </script>
+        <%= require('html-loader!./html/topbar.htm').default %>
 
-    <%= require('html-loader!./html/topbar.htm').default %>
+        <%= require('html-loader?!./html/textbox.htm').default %>
 
-    <%= require('html-loader!./html/about.htm').default %>
+        <%= require('html-loader!./html/settings.htm').default %>
 
-    <%= require('html-loader?!./html/textbox.htm').default %>
-
-    <%= require('html-loader!./html/settings.htm').default %>
-
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.1.0/css/font-awesome.css" rel="stylesheet">
-    
-    <!-- <%= require('html-loader!./html/google-analytics.htm').default %> -->
-
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.1.0/css/font-awesome.css" rel="stylesheet">    
+    </div>
 </body>
 
 </html>

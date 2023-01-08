@@ -30,7 +30,13 @@ export async function getTranscriptionText(uuid) {
     const response = await fetch( `${SC_BASE_URL}?uuid=${uuid}&ext=srt` , {
         method: 'GET'
     });
+    
+    if (response.status !== 200) {
+        return "Error carregant l'arxiu";
+    }
+
     const text = await response.text();
+    
     return parseSubtitleFormat(text);
 }
 
