@@ -44,13 +44,22 @@ export default async function init(){
 
     viewController.set('editor');
 
-    $('.settings-button').mousedown(() => {
+    $('.settings-button').on('click', () => {
         if (viewController.is('settings')) {
             viewController.set('editor');
         } else {
             viewController.set('settings');
         }
     });
+
+    $('.fullscreen-button').on('click', () => {
+        if (document.fullscreenElement) {
+            document.exitFullscreen();
+        } else {
+            $('#otranscribe-panel').get(0).requestFullscreen();
+        }
+    });
+
 
     // Gather query parameters into an object
     otrQueryParams = getQueryParams();
@@ -72,12 +81,13 @@ export default async function init(){
 
         try {
             const fileType = await getTranscriptionFileType(uuid);
-
+            console.log(fileType);
             await createPlayer({
                 driver: fileType.indexOf('video') > -1 ? playerDrivers.HTML5_VIDEO : playerDrivers.HTML5_AUDIO,
                 source: getTranscriptionFileURL(uuid),
                 name: uuid
             });
+            $('.topbar').removeClass('inputting');
             bindPlayerToUI(uuid);
             activateTimestamps();
         } catch (error) {
@@ -91,5 +101,13 @@ $(window).resize(function() {
         document.getElementById('media').style.width = oT.media.videoWidth();
     }
 });
+
+document.addEventListener('fullscreenchange', () => {
+    if (document.fullscreenElement) {
+        document.getElementById('fullscreen-icon').className = "fa fa-compress";
+    } else {
+        document.getElementById('fullscreen-icon').className = "fa fa-expand";
+    }
+}, false);
 
 

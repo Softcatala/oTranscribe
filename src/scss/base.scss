@@ -1,5 +1,3 @@
-@import "reset";
-
 $accent: rgb(52, 130, 177);
 $dark: hsl(0,0,15);
 $grey: #f1f1f1;
@@ -29,15 +27,26 @@ $accentGradient: linear-gradient( 0deg, lighten($accent, 0%) 5%, lighten($accent
 }
 
 
-body {
+#otranscribe-panel {
     @include noselect(none);
     font-family: "Helvetica Neue", "Helvetica", Arial, sans-serif;
     height: 100%;
     background: $grey;
 }
 
+#otranscribe-panel:fullscreen {
+    width: 100vw;
+    height: 100vh;
+    overflow: scroll;
+}
+
+#otranscribe-panel:fullscreen .topbar {
+    position: fixed;
+}
+
+
 #extra-ui-text {
     display: none;
 }
 
-@import "input", "about", "help", "controls", "topbar", "languages", "speedbox", "audiojs", "textbox", "message-panel", "sidebar", "export", "backup", "settings", "font-awesome-fallback";
+@import "controls", "topbar", "speedbox", "audiojs", "textbox", "message-panel", "sidebar", "export", "backup", "settings", "font-awesome-fallback";
