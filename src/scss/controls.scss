@@ -132,16 +132,14 @@
 }
 
 .time-selection {
-    position: fixed;
-    top: 20px;
+    position: absolute;
     z-index: 50;
-    top: 200px;
+    top: 38px;
     background: $dark;
     padding: 7px;
     color: white;
-    top: 25px;
     box-shadow: 0px 0px 5px black;
-    right: 160px;
+    right: 0;
     border: 1px solid #404040;
     
     display: none;
