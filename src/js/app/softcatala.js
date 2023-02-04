@@ -44,34 +44,29 @@ export function getTranscriptionFileURL(uuid) {
     return `${SC_BASE_URL}?uuid=${uuid}&ext=bin`;
 }
 
-function getFileType(contentDisposition) {
-    const fileExtensionRegexResult = /file\.(\w{3})/.exec(contentDisposition);
-    let fileExtension = undefined;
-    let fileType = "audio/mp3";
+function getFilename(contentDisposition) {
+    const filenameRegexResult = /^attachment;filename=(.*)$/.exec(contentDisposition);
+    let filename = undefined;
 
-    if (fileExtensionRegexResult && fileExtensionRegexResult.length > 1) {
-        fileExtension = fileExtensionRegexResult[1];
+    if (filenameRegexResult && filenameRegexResult.length > 1) {
+        filename = filenameRegexResult[1];
     }
 
-    if (["mp3", "ogg", "wav"].includes(fileExtension)) {
-        fileType = "audio/" + fileExtension;
-    } else if (fileExtension == "mp4") {
-        fileType = "video/mp4";
-    } else {
-        fileType = "unknown";
-    }
-
-    return fileType;
+    return filename;
 }
 
-export async function getTranscriptionFileType(uuid) {
+export async function getTranscriptionFileMeta(uuid) {
     const response = await fetch( getTranscriptionFileURL(uuid) , {
         method: 'HEAD'
     });
 
-    const contentDisposition = response.headers['content-disposition'];
+    const contentDisposition = response.headers.get('content-disposition');
+    const contentType = response.headers.get('content-type');
     
-    return getFileType(contentDisposition);
+    return {
+        "type": contentType,
+        "name": getFilename(contentDisposition)
+    }
 }
 
 export async function getTranscriptionFile(uuid) {

@@ -8,17 +8,17 @@ let otrQueryParams = {};
 import localStorageManager from 'local-storage-manager';
 
 import { watchFormatting, watchWordCount, initAutoscroll } from './texteditor';
-import { inputSetup, getQueryParams, hide as inputHide } from './input';
+import { getQueryParams } from './input';
 import languageSetup from './languages';
-import { createPlayer, playerDrivers, getPlayer, isVideoFormat } from './player/player';
+import { createPlayer, playerDrivers } from './player/player';
 import { bindPlayerToUI, keyboardShortcutSetup } from './ui';
-import { activateTimestamps, insertTimestamp, convertTimestampToSeconds, formatMilliseconds, createTimestampEl } from './timestamps';
+import { activateTimestamps, insertTimestamp, formatMilliseconds, createTimestampEl } from './timestamps';
 import { initBackup } from './backup';
 import { exportSetup } from './export';
 import importSetup from './import';
 import viewController from './view-controller';
 import { createSilentAudio } from './silent-audio';
-import { getTranscriptionFileType, getTranscriptionFileURL, getTranscriptionText, patchUI } from './softcatala'
+import { getTranscriptionFileMeta, getTranscriptionFileURL, getTranscriptionText } from './softcatala'
 import { closeTips } from './utils';
 
 export default async function init(){
@@ -80,15 +80,15 @@ export default async function init(){
         watchWordCount();
 
         try {
-            const fileType = await getTranscriptionFileType(uuid);
-            console.log(fileType);
+            const fileMeta = await getTranscriptionFileMeta(uuid);
+            const fileName = fileMeta.name || uuid;
             await createPlayer({
-                driver: fileType.indexOf('video') > -1 ? playerDrivers.HTML5_VIDEO : playerDrivers.HTML5_AUDIO,
+                driver: fileMeta.type.indexOf('video') > -1 ? playerDrivers.HTML5_VIDEO : playerDrivers.HTML5_AUDIO,
                 source: getTranscriptionFileURL(uuid),
-                name: uuid
+                name: fileName
             });
             $('.topbar').removeClass('inputting');
-            bindPlayerToUI(uuid);
+            bindPlayerToUI(fileName);
             activateTimestamps();
         } catch (error) {
             console.error(error);
