@@ -45,7 +45,7 @@ export function getTranscriptionFileURL(uuid) {
 }
 
 function getFilename(contentDisposition) {
-    const filenameRegexResult = /^attachment;filename=(.*)$/.exec(contentDisposition);
+    const filenameRegexResult = /filename=(.*)$/.exec(contentDisposition);
     let filename = undefined;
 
     if (filenameRegexResult && filenameRegexResult.length > 1) {
