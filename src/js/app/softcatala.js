@@ -45,11 +45,11 @@ export function getTranscriptionFileURL(uuid) {
 }
 
 function getFilename(contentDisposition) {
-    const filenameRegexResult = /filename=(.*)$/.exec(contentDisposition);
+    const filenameRegexResult = /filename\*=UTF-8''(.*)$/.exec(contentDisposition);
     let filename = undefined;
 
     if (filenameRegexResult && filenameRegexResult.length > 1) {
-        filename = filenameRegexResult[1];
+        filename = decodeURIComponent(filenameRegexResult[1]);
     }
 
     return filename;
