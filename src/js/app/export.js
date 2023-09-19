@@ -12,7 +12,7 @@ function getTexteditorContents() {
 }
 
 function getFilename() {
-    return document.webL10n.get('file-name') + " " + (new Date()).toUTCString();
+    return window.transcribedFileName || document.webL10n.get('file-name') + " " + (new Date()).toUTCString();
 }
 
 let exportFormats = {

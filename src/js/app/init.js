@@ -82,6 +82,7 @@ export default async function init(){
         try {
             const fileMeta = await getTranscriptionFileMeta(uuid);
             const fileName = fileMeta.name || uuid;
+            window.transcribedFileName = fileName.replace(/\.[^/.]+$/, "");
             await createPlayer({
                 driver: fileMeta.type.indexOf('video') > -1 ? playerDrivers.HTML5_VIDEO : playerDrivers.HTML5_AUDIO,
                 source: getTranscriptionFileURL(uuid),
